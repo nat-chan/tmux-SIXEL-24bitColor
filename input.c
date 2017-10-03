@@ -505,8 +505,8 @@ const struct input_transition input_state_csi_enter_table[] = {
 	{ 0x1c, 0x1f, input_c0_dispatch,  NULL },
 	{ 0x20, 0x2f, input_intermediate, &input_state_csi_intermediate },
 	{ 0x30, 0x39, input_parameter,	  &input_state_csi_parameter },
-	{ 0x3a, 0x3a, NULL,		  &input_state_csi_ignore },
-	{ 0x3b, 0x3b, input_parameter,	  &input_state_csi_parameter },
+//
+	{ 0x3a, 0x3b, input_parameter,	  &input_state_csi_parameter },
 	{ 0x3c, 0x3f, input_intermediate, &input_state_csi_parameter },
 	{ 0x40, 0x7e, input_csi_dispatch, &input_state_ground },
 	{ 0x7f, 0xff, NULL,		  NULL },
@@ -523,8 +523,7 @@ const struct input_transition input_state_csi_parameter_table[] = {
 	{ 0x1c, 0x1f, input_c0_dispatch,  NULL },
 	{ 0x20, 0x2f, input_intermediate, &input_state_csi_intermediate },
 	{ 0x30, 0x39, input_parameter,	  NULL },
-	{ 0x3a, 0x3a, NULL,		  &input_state_csi_ignore },
-	{ 0x3b, 0x3b, input_parameter,	  NULL },
+	{ 0x3a, 0x3b, input_parameter,	  NULL },
 	{ 0x3c, 0x3f, NULL,		  &input_state_csi_ignore },
 	{ 0x40, 0x7e, input_csi_dispatch, &input_state_ground },
 	{ 0x7f, 0xff, NULL,		  NULL },
@@ -918,7 +917,7 @@ input_split(struct input_ctx *ictx)
 		return (0);
 
 	ptr = ictx->param_buf;
-	while ((out = strsep(&ptr, ";")) != NULL) {
+	while ((out = strsep(&ptr, ":;")) != NULL) {
 		if (*out == '\0')
 			n = -1;
 		else {
@@ -1627,14 +1626,18 @@ input_csi_dispatch_sgr_256(struct input_ctx *ictx, int fgbg, u_int *i)
 			gc->fg = 8;
 		} else if (fgbg == 48) {
 			gc->flags &= ~GRID_FLAG_BG256;
+			gc->flags &= ~GRID_FLAG_BG24;
 			gc->bg = 8;
 		}
 	} else {
 		if (fgbg == 38) {
 			gc->flags |= GRID_FLAG_FG256;
+			gc->flags &= ~GRID_FLAG_FG24;
+			gc->flags &= ~GRID_FLAG_FG24;
 			gc->fg = c;
 		} else if (fgbg == 48) {
 			gc->flags |= GRID_FLAG_BG256;
+			gc->flags &= ~GRID_FLAG_BG24;
 			gc->bg = c;
 		}
 	}
@@ -1660,13 +1663,27 @@ input_csi_dispatch_sgr_rgb(struct input_ctx *ictx, int fgbg, u_int *i)
 	if (b == -1 || b > 255)
 		return;
 
-	c = colour_find_rgb(r, g, b);
-	if (fgbg == 38) {
-		gc->flags |= GRID_FLAG_FG256;
-		gc->fg = c;
-	} else if (fgbg == 48) {
-		gc->flags |= GRID_FLAG_BG256;
-		gc->bg = c;
+	/* XXX chopps: This would be a good place to add a "translate" option */
+	if (0) {
+		c = colour_find_rgb(r, g, b);
+		if (fgbg == 38) {
+			gc->flags |= GRID_FLAG_FG256;
+			gc->fg = c;
+		} else if (fgbg == 48) {
+			gc->flags |= GRID_FLAG_BG256;
+			gc->bg = c;
+		}
+	} else {
+		struct colour_rgb rgb = {.i=0, .r=r, .g=g, .b=b};
+		if (fgbg == 38) {
+			gc->flags &= ~GRID_FLAG_FG256;
+			gc->flags |= GRID_FLAG_FG24;
+			gc->fg_rgb = rgb;
+		} else if (fgbg == 48) {
+			gc->flags &= ~GRID_FLAG_BG256;
+			gc->flags |= GRID_FLAG_BG24;
+			gc->bg_rgb = rgb;
+		}
 	}
 }
 
@@ -1749,10 +1766,12 @@ input_csi_dispatch_sgr(struct input_ctx *ictx)
 		case 36:
 		case 37:
 			gc->flags &= ~GRID_FLAG_FG256;
+			gc->flags &= ~GRID_FLAG_FG24;
 			gc->fg = n - 30;
 			break;
 		case 39:
 			gc->flags &= ~GRID_FLAG_FG256;
+			gc->flags &= ~GRID_FLAG_FG24;
 			gc->fg = 8;
 			break;
 		case 40:
@@ -1764,10 +1783,12 @@ input_csi_dispatch_sgr(struct input_ctx *ictx)
 		case 46:
 		case 47:
 			gc->flags &= ~GRID_FLAG_BG256;
+			gc->flags &= ~GRID_FLAG_BG24;
 			gc->bg = n - 40;
 			break;
 		case 49:
 			gc->flags &= ~GRID_FLAG_BG256;
+			gc->flags &= ~GRID_FLAG_BG24;
 			gc->bg = 8;
 			break;
 		case 90:
@@ -1790,6 +1811,7 @@ input_csi_dispatch_sgr(struct input_ctx *ictx)
 		case 106:
 		case 107:
 			gc->flags &= ~GRID_FLAG_BG256;
+			gc->flags &= ~GRID_FLAG_BG24;
 			gc->bg = n - 10;
 			break;
 		}

@@ -29,12 +29,12 @@
  * of the 256 colour palette.
  */
 
-struct colour_rgb {
-	u_char  i;
-	u_char	r;
-	u_char	g;
-	u_char	b;
-};
+//struct colour_rgb {
+//	u_char  i;
+//	u_char	r;
+//	u_char	g;
+//	u_char	b;
+//};
 
 const struct colour_rgb colour_from_256[] = {
 	{   0, 0x00, 0x00, 0x00 }, {   1, 0x00, 0x00, 0x5f },
