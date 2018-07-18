@@ -1,0 +1,7 @@
+#!/bin/bash
+# ./autogen.sh: 15: ./autogen.sh: aclocal: not found
+# aclocal failed
+sudo apt install -y automake
+./autogen.sh 
+sudo apt install -y build-essential libevent-dev ncurses-dev
+./configure && make && sudo make install
