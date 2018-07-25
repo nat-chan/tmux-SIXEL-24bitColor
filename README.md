@@ -1,3 +1,7 @@
+
+![screen-shot](https://pbs.twimg.com/media/DGlV6BDU0AA6dm9.jpg:large)
+<blockquote class="twitter-tweet" data-lang="ja"><p lang="en" dir="ltr"><a href="https://twitter.com/hashtag/libsixel?src=hash&amp;ref_src=twsrc%5Etfw">#libsixel</a><br>24bit true color text &amp; sixel image in tmux <a href="https://t.co/NsTWYTl05V">pic.twitter.com/NsTWYTl05V</a></p>&mdash; ℕ (@mathbbN) <a href="https://twitter.com/mathbbN/status/894341840597430272?ref_src=twsrc%5Etfw">2017年8月6日</a></blockquote>
+
 Welcome to tmux!
 
 tmux is a "terminal multiplexer", it enables a number of terminals (or windows)
@@ -58,4 +62,3 @@ otherwise stated in the file but permission has been received to distribute
 them with tmux. All other files have a license and copyright notice at their
 start.
 
--- Nicholas Marriott <nicholas.marriott@gmail.com>
